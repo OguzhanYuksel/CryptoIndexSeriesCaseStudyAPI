@@ -13,7 +13,7 @@ namespace CryptoIndexSeriesCaseStudyAPI
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().InitializeSymbolDictionaries().Result.Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

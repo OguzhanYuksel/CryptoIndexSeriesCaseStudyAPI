@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using CryptoIndexSeriesCaseStudyAPI.Clients;
+using CryptoIndexSeriesCaseStudyAPI.Services.Concrete;
+using CryptoIndexSeriesCaseStudyAPI.Services.Interfaces;
+using AutoMapper;
+using CryptoIndexSeriesCaseStudyAPI.MappingProfiles;
 
 namespace CryptoIndexSeriesCaseStudyAPI
 {
@@ -23,7 +21,6 @@ namespace CryptoIndexSeriesCaseStudyAPI
 
         private IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
 
@@ -32,9 +29,13 @@ namespace CryptoIndexSeriesCaseStudyAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CryptoIndexSeriesCaseStudyAPI", Version = "v1" });
             });
+            services.AddHttpClient<BinanceClient>();
+            services.AddHttpClient<CoinBaseProClient>();
+            services.AddHttpClient<HuobiClient>();
+            services.AddScoped<IExchangeDataUnifierService, ExchangeDataUnifierService>();
+            services.AddAutoMapper(typeof(UnifiedTradeDataMappingProfile), typeof(UnifiedCandleStickDataMappingProfile), typeof(UnifiedOrderbookDataMappingProfile));
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -49,6 +50,7 @@ namespace CryptoIndexSeriesCaseStudyAPI
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseWebSockets();
 
             app.UseEndpoints(endpoints =>
             {
